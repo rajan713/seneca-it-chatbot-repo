@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Azure Chatbot Demo</title>
+</head>
+<body>
+    <h2>Chatbot</h2>
+    <div id="chat"></div>
+    <input id="msg" />
+    <button onclick="send()">Send</button>
+
+    <script>
+        async function send() {
+            const msg = document.getElementById("msg").value;
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, user: "demoUser" })
+            });
+
+            const data = await response.json();
+            document.getElementById("chat").innerHTML += "<p>You: " + msg + "</p>";
+            document.getElementById("chat").innerHTML += "<p>Bot: " + data.reply + "</p>";
+        }
+    </script>
+</body>
+</html>
