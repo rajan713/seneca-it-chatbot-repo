@@ -1,7 +1,6 @@
 {
-  "name": "echobot",
+  "name": "bot",
   "version": "1.0.0",
-  "description": "Simple Echo Bot",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
