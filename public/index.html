@@ -1,27 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Azure Chatbot Demo</title>
+    <title>Azure AI Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 40px;
+        }
+
+        #chatbox {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .user {
+            color: #0078D4;
+            font-weight: bold;
+        }
+
+        .bot {
+            color: #333;
+        }
+
+        input {
+            padding: 10px;
+            width: 400px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0078D4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h2>Chatbot</h2>
-    <div id="chat"></div>
-    <input id="msg" />
-    <button onclick="send()">Send</button>
 
-    <script>
-        async function send() {
-            const msg = document.getElementById("msg").value;
-            const response = await fetch('/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg, user: "demoUser" })
-            });
+<h2>Azure AI Chatbot Demo</h2>
 
-            const data = await response.json();
-            document.getElementById("chat").innerHTML += "<p>You: " + msg + "</p>";
-            document.getElementById("chat").innerHTML += "<p>Bot: " + data.reply + "</p>";
-        }
-    </script>
+<div id="chatbox"></div>
+
+<input id="msg" placeholder="Type a message..." />
+<button onclick="send()">Send</button>
+
+<script>
+    async function send() {
+        const msgInput = document.getElementById("msg");
+        const message = msgInput.value;
+
+        if (!message) return;
+
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message, user: "demoUser" })
+        });
+
+        const data = await response.json();
+
+        const chatbox = document.getElementById("chatbox");
+        chatbox.innerHTML = "";
+
+        data.history.forEach(entry => {
+            if (entry.role === "user") {
+                chatbox.innerHTML += `<p class="user">You: ${entry.text}</p>`;
+            } else {
+                chatbox.innerHTML += `<p class="bot">Bot: ${entry.text}</p>`;
+            }
+        });
+
+        msgInput.value = "";
+        chatbox.scrollTop = chatbox.scrollHeight;
+    }
+</script>
+
 </body>
 </html>
