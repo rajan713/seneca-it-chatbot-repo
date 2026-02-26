@@ -1,30 +1,39 @@
-const restify = require('restify');
-const {
-    CloudAdapter,
-    ConfigurationBotFrameworkAuthentication
-} = require('botbuilder');
+const express = require('express');
+const path = require('path');
 
-const server = restify.createServer();
-server.use(restify.plugins.bodyParser());
+const app = express();
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-server.listen(process.env.PORT || 3978, () => {
-    console.log(`Server running`);
+let conversationHistory = {};
+
+app.post('/chat', async (req, res) => {
+    const { message, user } = req.body;
+
+    if (!conversationHistory[user]) {
+        conversationHistory[user] = [];
+    }
+
+    conversationHistory[user].push(message);
+
+    let response = "";
+
+    // Simple intent detection
+    if (message.toLowerCase().includes("hello")) {
+        response = "Hello! How can I help you today?";
+    } 
+    else if (message.toLowerCase().includes("bye")) {
+        response = "Goodbye! Have a great day.";
+    }
+    else {
+        response = "I received: " + message;
+    }
+
+    conversationHistory[user].push(response);
+
+    res.json({ reply: response });
 });
 
-const botFrameworkAuthentication =
-    new ConfigurationBotFrameworkAuthentication(process.env);
-
-const adapter = new CloudAdapter(botFrameworkAuthentication);
-
-adapter.onTurnError = async (context, error) => {
-    console.error(error);
-    await context.sendActivity("Sorry, something went wrong.");
-};
-
-server.post('/api/messages', async (req, res) => {
-    await adapter.process(req, res, async (context) => {
-        if (context.activity.type === 'message') {
-            await context.sendActivity(`You said: ${context.activity.text}`);
-        }
-    });
+app.listen(process.env.PORT || 3000, () => {
+    console.log("Server running...");
 });
